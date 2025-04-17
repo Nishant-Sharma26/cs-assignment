@@ -1,5 +1,5 @@
 const express = require('express');
-
+const serverless = require('serverless-http');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
@@ -30,8 +30,4 @@ app.use('/api/lists', listRoutes);
 module.exports = app;
 module.exports.handler = serverless(app);
 
-// Optional: Local dev only
-if (process.env.NODE_ENV !== 'production') {
-  const PORT = process.env.PORT || 3000;
-  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-}
+
