@@ -1,0 +1,15 @@
+# Dependencies
+node_modules/
+
+# Temporary upload directory
+uploads/
+
+# Logs
+*.log
+
+# Environment variables
+.env
+
+# Build output
+dist/
+build/
