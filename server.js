@@ -13,20 +13,9 @@ const app = express();
 app.use(express.json());
 
 app.use(cors({
-    origin: (origin, callback) => {
-      const allowedOrigins = [
-        "http://localhost:3000", // Local frontend
-        "https://crm-frontend-umber-rho.vercel.app" // Deployed frontend
-      ];
-
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    methods: ["GET", "POST"], // Allowed methods
-    credentials: true, // Allow credentials (e.g., Authorization header)
+    origin: true, // Allows all origins during development/deployment testing
+    methods: ["GET", "POST"],
+    credentials: true
   }));
   
 
