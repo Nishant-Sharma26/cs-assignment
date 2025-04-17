@@ -26,7 +26,7 @@ app.use(cors({
         callback(new Error("Not allowed by CORS"));
       }
     },
-    methods: ["GET", "POST", "PUT", "DELETE"], // Allowed methods
+    methods: ["GET", "POST"], // Allowed methods
     credentials: true, // Allow credentials (e.g., Authorization header)
   }));
   
@@ -40,7 +40,19 @@ app.use('/api/auth', authRoutes);
 app.use('/api/agents', agentRoutes);
 app.use('/api/lists', listRoutes);
 
-module.exports = app;
-module.exports.handler = serverless(app);
+app.get("/health", (req, res) => {
+    res.status(200).json({ status: "OK", message: "Server is running" });
+  });
+  
+  app.use((err, req, res, next) => {
+    console.error("Server error:", err.stack);
+    res.status(500).json({ message: "Internal Server Error", error: err.message });
+  });
+  
+  module.exports = app;
+  
+  process.on("unhandledRejection", (err) => {
+    console.error("Unhandled Rejection:", err);
+  });
 
 
