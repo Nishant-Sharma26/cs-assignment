@@ -1,25 +1,30 @@
 const express = require('express');
 const multer = require('multer');
 const csvParser = require('csv-parser');
-const fs = require('fs');
 const Agent = require('../models/agent');
 const List = require('../models/List');
 const authMiddleware = require('../middleware/auth');
+const stream = require('stream');
 
 const router = express.Router();
 
-const upload = multer({ dest: 'uploads/' });
+// Use memory storage instead of writing to disk
+const upload = multer({ storage: multer.memoryStorage() });
 
 router.post('/upload', authMiddleware, upload.single('file'), async (req, res) => {
   if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
-  const fileExt = req.file.originalname.split('.').pop();
-  if (!['csv', 'xlsx', 'xls'].includes(fileExt)) {
-    fs.unlinkSync(req.file.path);
-    return res.status(400).json({ message: 'Invalid file format' });
+
+  const fileExt = req.file.originalname.split('.').pop().toLowerCase();
+  if (!['csv'].includes(fileExt)) {
+    return res.status(400).json({ message: 'Only CSV files are supported' });
   }
 
   const items = [];
-  fs.createReadStream(req.file.path)
+
+  const bufferStream = new stream.PassThrough();
+  bufferStream.end(req.file.buffer);
+
+  bufferStream
     .pipe(csvParser())
     .on('data', (row) => {
       const phone = String(row.phone_number || '').trim();
@@ -37,7 +42,6 @@ router.post('/upload', authMiddleware, upload.single('file'), async (req, res) =
       }
     })
     .on('end', async () => {
-      fs.unlinkSync(req.file.path);
       try {
         if (items.length === 0) {
           return res.status(400).json({ message: 'No valid rows in CSV' });
@@ -69,6 +73,7 @@ router.post('/upload', authMiddleware, upload.single('file'), async (req, res) =
             }
           }
         }
+
         res.json({ message: 'Lists distributed successfully' });
       } catch (err) {
         console.error('Error distributing lists:', err.message, err.stack);
@@ -76,10 +81,11 @@ router.post('/upload', authMiddleware, upload.single('file'), async (req, res) =
       }
     })
     .on('error', (err) => {
-      fs.unlinkSync(req.file.path);
+      console.error('Error parsing CSV file:', err.message);
       res.status(500).json({ message: 'Error parsing CSV file' });
     });
 });
+
 
 router.get('/', authMiddleware, async (req, res) => {
   try {
