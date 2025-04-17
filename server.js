@@ -11,14 +11,27 @@ const connectDB = require('./config/db');
 dotenv.config();
 
 const app = express();
+app.use(express.json());
 
 app.use(cors({
-  origin: '*',
-  methods: ['GET', 'POST'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-}));
+    origin: (origin, callback) => {
+      const allowedOrigins = [
+        "http://localhost:3000", // Local frontend
+        "https://crm-frontend-umber-rho.vercel.app" // Deployed frontend
+      ];
 
-app.use(express.json());
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE"], // Allowed methods
+    credentials: true, // Allow credentials (e.g., Authorization header)
+  }));
+  
+
+
 
 // Connect to DB
 connectDB();
