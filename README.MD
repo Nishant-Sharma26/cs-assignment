@@ -98,4 +98,4 @@ This backend uses Express.js with Mongoose for MongoDB integration and Multer fo
 Feel free to explore the code and modify it as needed for your assignment.
 For any issues, you can reach out or check the GitHub Issues tab.
 
-Happy coding! 🚀
+Happy coding! 
